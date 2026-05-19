@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In / Sign Up</title>
+    <link rel="stylesheet" href="assets/css/Register.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Sign In Card -->
+        <div class="card" id="signin-card">
+            <div class="logo">📊 ExpenseTracker</div>
+            <div class="subtitle">Welcome back! Sign in to your account</div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showSignIn()">Sign In</button>
+                <button class="tab" onclick="showSignUp()">Sign Up</button>
+            </div>
+
+            <div id="signin-error" class="error-message"></div>
+            <div id="signin-success" class="success-message"></div>
+
+            <form id="signin-form">
+                <div class="field">
+                    <label>Email</label>
+                    <input id="signin-email" type="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="field">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="signin-password" placeholder="Enter your password" required>
+                        <span class="toggle-password" data-target="signin-password">👁</span>
+                    </div>
+                </div>
+
+                <div class="forgot">Forgot password?</div>
+
+                <button class="btn-primary">Sign In</button>
+
+                <div class="divider">OR CONTINUE WITH</div>
+
+                <div class="social">
+                    <button>Google</button>
+                    <button>Apple</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sign Up Card -->
+        <div class="card hidden" id="signup-card">
+            <div class="logo">📊 ExpenseTracker</div>
+            <div class="subtitle">Create your account to get started</div>
+
+            <div class="tabs">
+                <button class="tab" onclick="showSignIn()">Sign In</button>
+                <button class="tab active" onclick="showSignUp()">Sign Up</button>
+            </div>
+
+            <div id="signup-error" class="error-message"></div>
+            <div id="signup-success" class="success-message"></div>
+
+            <form id="signup-form">
+                <div class="field">
+                    <label>Full Name</label>
+                    <input id="signup-username" type="text" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="field">
+                    <label>Email</label>
+                    <input id="signup-email" type="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="field">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Create a password" required>
+                        <span class="toggle-password" data-target="signup-password">👁</span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Confirm Password</label>
+                    <div class="input-wrapper">
+                        <input id="signup-confirm-password" type="password" placeholder="Confirm your password" required>
+                        <span class="toggle-password" data-target="signup-confirm-password">👁</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary">Create Account</button>
+
+                <div class="divider">OR CONTINUE WITH</div>
+
+                <div class="social">
+                    <button>Google</button>
+                    <button>Apple</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <script src="assets/js/Register.js"></script>
+</body>
+</html>

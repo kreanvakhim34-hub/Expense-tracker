@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+
+<body>
+
+    <header class="mobile-header">
+        <button id="menu-toggle" class="hamburger">☰</button>
+        <h2>SpendWise</h2>
+    </header>
+
+    <nav class="sidebar">
+        <div class="profile">
+            <img id="profilePicture" src="https://static.vecteezy.com/system/resources/previews/046/409/821/non_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg"
+                alt="" style="cursor: pointer; transition: opacity 0.3s;" onclick="document.getElementById('profilePictureInput').click()" title="Click to change profile picture">
+            <h3 id="profile-name"></h3>
+        </div>
+        <h2>SpendWise</h2>
+        <ul class="nav-links">
+            <li id="nav-dashboard" class="active" onclick="showPage('dashboard')">Dashboard</li>
+            <li id="nav-transactions" onclick="showPage('transactions')">Transactions</li>
+            <li id="nav-reports" onclick="showPage('reports')">Reports</li>
+            <li id="nav-settings" onclick="showPage('settings')">Settings</li>
+        </ul>
+    </nav>
+
+    <main id="dashboard-page" class="page-content active">
+        <div class="header-row">
+            <h1>Financial Analytics</h1>
+            <div class="period-selector">
+                <button class="period-btn active" data-period="daily">Daily</button>
+                <button class="period-btn" data-period="weekly">Weekly</button>
+                <button class="period-btn" data-period="monthly">Monthly</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Balance</div>
+                <div class="value" id="balance">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Income</div>
+                <div class="value" id="income" style="color: var(--success)">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Expenses</div>
+                <div class="value" id="expenses" style="color: var(--danger)">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label" id="budgetLabel">Daily Budget Progress</div>
+                <div class="value" id="budgetUsed">0%</div>
+                <div style="height:6px; background:#f1f5f9; border-radius:10px; overflow:hidden; margin-top:10px;">
+                    <div id="budgetBar" style="width:0%; height:100%; background:var(--primary);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>Expense Breakdown</h3>
+                <canvas id="expenseDonut"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 id="trendTitle">Financial Performance</h3>
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+
+    <main id="transactions-page" class="page-content">
+        <h1>Transactions</h1>
+
+        <div class="card">
+            <h3 id="formTitle">Add Record</h3>
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="form-row">
+                <input type="text" id="desc" placeholder="What did you buy?">
+                <input type="number" id="amt" placeholder="Amount">
+                <select id="cat">
+                    <option>Food & Drinks</option>
+                    <option>Rent</option>
+                    <option>Bills</option>
+                    <option>Shopping</option>
+                    <option>Travel</option>
+                    <option>Other</option>
+                </select>
+                <select id="type">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+                <input type="date" id="transDate">
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary" id="saveBtn" onclick="saveTransaction()">Save</button>
+                    <button class="btn btn-outline" id="cancelBtn" onclick="clearForm()"
+                        style="display: none;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 15px;">
+                <h3>History</h3>
+                <div style="display:flex; gap: 10px; align-items: center;">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" class="search-input"
+                            placeholder="Search by name or category..." onkeyup="renderTable()">
+                    </div>
+                    <button class="btn btn-outline" onclick="exportToCSV()">CSV</button>
+                    <button class="btn btn-outline" onclick="exportToPDF()">PDF</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionList"></tbody>
+            </table>
+        </div>
+    </main>
+    <main id="reports-page" class="page-content">
+        <h1>Reports</h1>
+        <div class="card">
+            <h3>Generate Financial Report</h3>
+            <div class="form-row">
+                <label for="reportStartDate">Start Date:</label>
+                <input type="date" id="reportStartDate">
+                <label for="reportEndDate">End Date:</label>
+                <input type="date" id="reportEndDate">
+                <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+            </div>
+        </div>
+        <div class="card" id="reportResult" style="display:none; margin-top:20px;">
+            <h3>Report Summary</h3>
+            <div id="reportContent"></div>
+            <button class="btn btn-outline" onclick="exportReportToPDF()">Export to PDF</button>
+        </div>
+    </main>
+    <main id="settings-page" class="page-content">
+        <h1>Settings</h1>
+
+        <!-- Profile Settings -->
+        <div class="card">
+            <h3>👤 Profile Settings</h3>
+            <div style="margin-bottom: 20px; text-align: center;">
+                <img id="settingsProfilePicture" src="https://static.vecteezy.com/system/resources/previews/046/409/821/non_2x/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector.jpg"
+                    alt="Profile" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #e5e7eb; cursor: pointer; transition: opacity 0.3s;" 
+                    onclick="document.getElementById('profilePictureInput').click()" title="Click to change profile picture">
+                <p style="margin-top: 10px; font-size: 13px; color: #666;">Click image to change picture</p>
+            </div>
+            <div class="form-row">
+                <label for="profileName">Name:</label>
+                <input type="text" id="profileName" placeholder="Enter your name">
+            </div>
+            <div class="form-row">
+                <label for="choose-profile">Choose Profile Picture:</label>
+                <button class="btn btn-outline" onclick="document.getElementById('profilePictureInput').click()">Choose Profile Picture</button>
+            </div>
+            <button class="btn btn-primary" onclick="saveSettings()">Save Profile Settings</button>
+            <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Budget Limits -->
+        <div class="card" style="margin-top: 20px;">
+            <h3>💰 Budget Limits</h3>
+            <div class="form-row">
+                <label for="dailyBudget">Daily Budget:</label>
+                <input type="number" id="dailyBudget" placeholder="Enter daily budget" min="0">
+            </div>
+            <div class="form-row">
+                <label for="weeklyBudget">Weekly Budget:</label>
+                <input type="number" id="weeklyBudget" placeholder="Enter weekly budget" min="0">
+            </div>
+            <div class="form-row">
+                <label for="monthlyBudget">Monthly Budget:</label>
+                <input type="number" id="monthlyBudget" placeholder="Enter monthly budget" min="0">
+            </div>
+            <div class="form-row">
+                <label for="budgetAlert">Budget Alert Threshold (%):</label>
+                <input type="number" id="budgetAlert" placeholder="Alert when budget exceeds %" min="0" max="100" value="80">
+            </div>
+            <button class="btn btn-primary" onclick="saveBudgetSettings()">Save Budget Settings</button>
+        </div>
+
+        <!-- Account -->
+        <div class="card" style="margin-top: 20px;">
+            <h3>🔐 Account</h3>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">You are logged in as <strong id="loggedInUser"></strong></p>
+            <button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
+        </div>
+    </main>
+</body>
+<script src="assets/js/dashboard.js"></script>
+
+</html>
